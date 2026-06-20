@@ -295,8 +295,22 @@ html, body, * {
 
 /* FIX 3: edit/delete micro-buttons — improved spacing and symmetry */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
-  align-items: center !important;
-  display:     flex !important;
+  align-items:     center !important;
+  display:         flex !important;
+  flex-wrap:       nowrap !important;
+  gap:             4px !important;
+}
+/* Force the two columns to behave by content-width, not by the [6,2] ratio,
+   so the icon column never stretches/squashes on narrow (mobile) viewports. */
+[data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {
+  flex:      1 1 auto !important;
+  min-width: 0 !important; /* allow the title button to truncate instead of pushing icons out */
+  width:     auto !important;
+}
+[data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
+  flex:      0 0 64px !important;
+  width:     64px !important;
+  max-width: 64px !important;
 }
 
 .action-btn-row {
@@ -321,7 +335,8 @@ html, body, * {
   color:            #9CA3AF !important;
   border:           1px solid var(--border) !important;
   border-radius:    8px !important;
-  font-size:        0 !important;     /* hide the raw emoji glyph (renders as a "tofu" box on some servers/fonts) */
+  font-size:        14px !important;
+  line-height:      1 !important;
   padding:          0 !important;
   min-height:       28px !important;
   height:           28px !important;
@@ -333,26 +348,8 @@ html, body, * {
   display:          flex !important;
   align-items:      center !important;
   justify-content:  center !important;
-  position:         relative !important;
 }
 
-/* Draw crisp inline-SVG icons instead of relying on emoji font support */
-[data-testid="stSidebar"] div[class*="st-key-rename_"] button::before,
-[data-testid="stSidebar"] div[class*="st-key-del_"] button::before {
-  content: "";
-  display: block;
-  width: 14px;
-  height: 14px;
-  background-color: currentColor;
-}
-[data-testid="stSidebar"] div[class*="st-key-rename_"] button::before {
-  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') no-repeat center / contain;
-  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') no-repeat center / contain;
-}
-[data-testid="stSidebar"] div[class*="st-key-del_"] button::before {
-  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') no-repeat center / contain;
-  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') no-repeat center / contain;
-}
 [data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-color: #FCA5A5 !important; color: #DC2626 !important; }
 [data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-color: var(--blue) !important; color: var(--blue) !important; }
 
