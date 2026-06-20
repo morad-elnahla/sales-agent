@@ -13,7 +13,7 @@
 |:-----------:|:-------------:|:-----------------:|:------:|
 | **Arabic + English** | **Agentic RAG** | **52 courses · 13 roadmaps** | **MongoDB** |
 
-**[🚀 Try the Live App →](https://your-app-link.streamlit.app/)**
+**[🚀 Try the Live App →](https://sales-agent-kayfa.streamlit.app/)**
 
 </div>
 
@@ -23,12 +23,18 @@
 
 ### 💬 Chat Agent — Arabic RTL
 <p align="center">
-  <img src="images/chat.png" width="95%">
+  <img src="1.png" width="95%">
+</p>
+<p align="center">
+  <img src="2.png" width="95%">
+</p>
+<p align="center">
+  <img src="3.png" width="95%">
 </p>
 
 ### 📋 CRM Dashboard — Lead Tickets
 <p align="center">
-  <img src="images/crm.png" width="95%">
+  <img src="4.png" width="95%">
 </p>
 
 ---
