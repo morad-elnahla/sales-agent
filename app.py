@@ -304,9 +304,9 @@ html, body, * {
   gap:             4px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {
-  flex:      0 0 80px !important;
-  width:     80px !important;
-  max-width: 80px !important;
+  flex:      0 0 92px !important;
+  width:     92px !important;
+  max-width: 92px !important;
   order:     1 !important;   /* icons pinned to the far left */
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
@@ -322,7 +322,7 @@ html, body, * {
   flex:  0 0 36px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:first-child [data-testid="stHorizontalBlock"] {
-  gap:             10px !important;  /* small, clear breathing room between edit and delete */
+  gap:             20px !important;  /* clear, generous breathing room between edit and delete, matching the mockup */
   justify-content: flex-start !important;
 }
 
