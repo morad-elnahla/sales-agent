@@ -293,19 +293,19 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
-/* FIX 3: edit/delete micro-buttons — two equal squares, far-left of the card */
+/* FIX 3: edit/delete icon buttons — colored SVG icons in soft rounded squares,
+   matching the approved mockup exactly. Real SVG is used instead of emoji glyphs
+   so the icon (shape + color) renders identically on every browser/server. */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
   align-items:     center !important;
   display:         flex !important;
   flex-wrap:       nowrap !important;
   gap:             4px !important;
 }
-/* btns_col (now physically first = far left) stays a fixed small width;
-   row_col (title) takes the remaining space and can truncate. */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {
-  flex:      0 0 68px !important;
-  width:     68px !important;
-  max-width: 68px !important;
+  flex:      0 0 80px !important;
+  width:     80px !important;
+  max-width: 80px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
   flex:      1 1 auto !important;
@@ -313,39 +313,50 @@ html, body, * {
   width:     auto !important;
 }
 
-/* The two icon buttons themselves: identical 30x30 squares, small fixed gap */
 [data-testid="stSidebar"] div[class*="st-key-rename_"],
 [data-testid="stSidebar"] div[class*="st-key-del_"] {
-  width: 30px !important;
-  flex:  0 0 30px !important;
+  width: 36px !important;
+  flex:  0 0 36px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:first-child [data-testid="stHorizontalBlock"] {
-  gap:             6px !important; /* light, even space between edit and delete */
+  gap:             8px !important;
   justify-content: flex-start !important;
 }
 
 [data-testid="stSidebar"] div[class*="st-key-rename_"] button,
 [data-testid="stSidebar"] div[class*="st-key-del_"] button {
-  background:       transparent !important;
-  border:           none !important;
-  border-radius:    8px !important;
-  font-size:        16px !important;  /* real emoji size, not a fallback-triggering tiny size */
+  font-size:        0 !important;   /* hide the raw emoji glyph; the SVG below draws the icon */
   line-height:      1 !important;
   padding:          0 !important;
-  min-height:       30px !important;
-  height:           30px !important;
-  width:            30px !important;
-  min-width:        30px !important;
-  max-width:        30px !important;
+  min-height:       36px !important;
+  height:           36px !important;
+  width:            36px !important;
+  min-width:        36px !important;
+  max-width:        36px !important;
+  border-radius:    10px !important;
   box-shadow:       none !important;
   margin:           0 !important;
   display:          flex !important;
   align-items:      center !important;
   justify-content:  center !important;
+  background-repeat:    no-repeat !important;
+  background-position:  center !important;
+  background-size:      18px 18px !important;
 }
 
-[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-radius: 8px !important; }
-[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-radius: 8px !important; }
+[data-testid="stSidebar"] div[class*="st-key-del_"] button {
+  background-color: #FEF2F2 !important;
+  border: 1px solid #FEE2E2 !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') !important;
+}
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button {
+  background-color: #EFF3FF !important;
+  border: 1px solid #E0E7FF !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232E4BF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') !important;
+}
+
+[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background-color: #FEE2E2 !important; }
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background-color: #E0E7FF !important; }
 
 /* ══ Previous-chat card ══ */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] {
@@ -670,12 +681,12 @@ def _sidebar(active: str):
                         with btns_col:
                             b1, b2 = st.columns(2, gap="small")
                             with b1:
-                                if st.button("✏", key=f"rename_{sid}", help="Rename"):
-                                    st.session_state.renaming_sid = sid
-                                    st.rerun()
-                            with b2:
                                 if st.button("🗑", key=f"del_{sid}", help="Delete"):
                                     _delete_session(sid)
+                                    st.rerun()
+                            with b2:
+                                if st.button("✏", key=f"rename_{sid}", help="Rename"):
+                                    st.session_state.renaming_sid = sid
                                     st.rerun()
 
                         with row_col:
