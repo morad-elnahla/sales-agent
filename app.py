@@ -322,7 +322,7 @@ html, body, * {
   flex:  0 0 36px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:first-child [data-testid="stHorizontalBlock"] {
-  gap:             8px !important;
+  gap:             10px !important;  /* small, clear breathing room between edit and delete */
   justify-content: flex-start !important;
 }
 
@@ -374,7 +374,7 @@ html, body, * {
   border-radius: 10px !important;
   box-shadow:    0 1px 3px rgba(30,30,60,.07) !important;
   margin:        0 2px 10px 2px !important;
-  padding:       4px 8px !important;
+  padding:       6px 10px !important;
 }
 
 /* ══ History Label ══ */
