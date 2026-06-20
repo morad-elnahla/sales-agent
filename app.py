@@ -298,7 +298,7 @@ html, body, * {
   align-items:     center !important;
   display:         flex !important;
   flex-wrap:       nowrap !important;
-  gap:             4px !important;
+  gap:             0 !important;
 }
 /* Force the two columns to behave by content-width, not by the [6,2] ratio,
    so the icon column never stretches/squashes on narrow (mobile) viewports. */
@@ -306,52 +306,48 @@ html, body, * {
   flex:      1 1 auto !important;
   min-width: 0 !important; /* allow the title button to truncate instead of pushing icons out */
   width:     auto !important;
+  order:     2 !important; /* title sits after the icons, so icons land at the far edge */
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
-  flex:      0 0 64px !important;
-  width:     64px !important;
-  max-width: 64px !important;
+  flex:      0 0 76px !important;
+  width:     76px !important;
+  max-width: 76px !important;
+  order:     1 !important;
 }
 
-.action-btn-row {
-  display: flex !important;
-  gap: 6px !important;
-  justify-content: center !important;
-  align-items: center !important;
-  height: 100% !important;
-}
-
-/* Target the real Streamlit button wrapper via its key, since st.markdown divs
-   render as separate siblings (not actual parents) of st.button in Streamlit. */
+/* The two icon buttons themselves: bigger emoji, clear gap, no border/box look */
 [data-testid="stSidebar"] div[class*="st-key-rename_"],
 [data-testid="stSidebar"] div[class*="st-key-del_"] {
-  width: 28px !important;
-  flex: 0 0 28px !important;
+  width: 32px !important;
+  flex:  0 0 32px !important;
+}
+[data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:last-child [data-testid="stHorizontalBlock"] {
+  gap: 10px !important; /* clear separation between the edit and delete icons */
+  justify-content: flex-start !important;
 }
 
 [data-testid="stSidebar"] div[class*="st-key-rename_"] button,
 [data-testid="stSidebar"] div[class*="st-key-del_"] button {
-  background:      #fff !important;
-  color:            #9CA3AF !important;
-  border:           1px solid var(--border) !important;
+  background:       transparent !important;
+  border:           none !important;
   border-radius:    8px !important;
-  font-size:        14px !important;
+  font-size:        16px !important;  /* real emoji size, not a fallback-triggering tiny size */
   line-height:      1 !important;
   padding:          0 !important;
-  min-height:       28px !important;
-  height:           28px !important;
-  width:            28px !important;
-  min-width:        28px !important;
-  max-width:        28px !important;
+  min-height:       32px !important;
+  height:           32px !important;
+  width:            32px !important;
+  min-width:        32px !important;
+  max-width:        32px !important;
   box-shadow:       none !important;
-  margin:           0 auto !important;
+  margin:           0 !important;
   display:          flex !important;
   align-items:      center !important;
   justify-content:  center !important;
 }
 
-[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-color: #FCA5A5 !important; color: #DC2626 !important; }
-[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-color: var(--blue) !important; color: var(--blue) !important; }
+[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-radius: 8px !important; }
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-radius: 8px !important; }
 
 /* ══ Previous-chat card ══ */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] {
