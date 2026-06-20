@@ -293,36 +293,34 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
-/* FIX 3: edit/delete micro-buttons — improved spacing and symmetry */
+/* FIX 3: edit/delete micro-buttons — two equal squares, far-left of the card */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
   align-items:     center !important;
   display:         flex !important;
   flex-wrap:       nowrap !important;
-  gap:             0 !important;
+  gap:             4px !important;
 }
-/* Force the two columns to behave by content-width, not by the [6,2] ratio,
-   so the icon column never stretches/squashes on narrow (mobile) viewports. */
+/* btns_col (now physically first = far left) stays a fixed small width;
+   row_col (title) takes the remaining space and can truncate. */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {
-  flex:      1 1 auto !important;
-  min-width: 0 !important; /* allow the title button to truncate instead of pushing icons out */
-  width:     auto !important;
-  order:     2 !important; /* title sits after the icons, so icons land at the far edge */
+  flex:      0 0 68px !important;
+  width:     68px !important;
+  max-width: 68px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
-  flex:      0 0 76px !important;
-  width:     76px !important;
-  max-width: 76px !important;
-  order:     1 !important;
+  flex:      1 1 auto !important;
+  min-width: 0 !important;
+  width:     auto !important;
 }
 
-/* The two icon buttons themselves: bigger emoji, clear gap, no border/box look */
+/* The two icon buttons themselves: identical 30x30 squares, small fixed gap */
 [data-testid="stSidebar"] div[class*="st-key-rename_"],
 [data-testid="stSidebar"] div[class*="st-key-del_"] {
-  width: 32px !important;
-  flex:  0 0 32px !important;
+  width: 30px !important;
+  flex:  0 0 30px !important;
 }
-[data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:last-child [data-testid="stHorizontalBlock"] {
-  gap: 10px !important; /* clear separation between the edit and delete icons */
+[data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:first-child [data-testid="stHorizontalBlock"] {
+  gap:             6px !important; /* light, even space between edit and delete */
   justify-content: flex-start !important;
 }
 
@@ -334,11 +332,11 @@ html, body, * {
   font-size:        16px !important;  /* real emoji size, not a fallback-triggering tiny size */
   line-height:      1 !important;
   padding:          0 !important;
-  min-height:       32px !important;
-  height:           32px !important;
-  width:            32px !important;
-  min-width:        32px !important;
-  max-width:        32px !important;
+  min-height:       30px !important;
+  height:           30px !important;
+  width:            30px !important;
+  min-width:        30px !important;
+  max-width:        30px !important;
   box-shadow:       none !important;
   margin:           0 !important;
   display:          flex !important;
@@ -667,7 +665,18 @@ def _sidebar(active: str):
                     # ── Normal row ──
                     icon = "▶ " if (sid == cur) else ""
                     with st.container(key=f"chat_card_{sid}"):
-                        row_col, btns_col = st.columns([6, 2])
+                        btns_col, row_col = st.columns([2, 6])
+
+                        with btns_col:
+                            b1, b2 = st.columns(2, gap="small")
+                            with b1:
+                                if st.button("✏", key=f"rename_{sid}", help="Rename"):
+                                    st.session_state.renaming_sid = sid
+                                    st.rerun()
+                            with b2:
+                                if st.button("🗑", key=f"del_{sid}", help="Delete"):
+                                    _delete_session(sid)
+                                    st.rerun()
 
                         with row_col:
                             if st.button(f"{icon}{title}", key=f"hist_{sid}",
@@ -682,17 +691,6 @@ def _sidebar(active: str):
                                 except Exception:
                                     pass
                                 st.rerun()
-
-                        with btns_col:
-                            b1, b2 = st.columns(2, gap="small")
-                            with b1:
-                                if st.button("✏", key=f"rename_{sid}", help="Rename"):
-                                    st.session_state.renaming_sid = sid
-                                    st.rerun()
-                            with b2:
-                                if st.button("🗑", key=f"del_{sid}", help="Delete"):
-                                    _delete_session(sid)
-                                    st.rerun()
 
         elif active == "crm":
             st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
