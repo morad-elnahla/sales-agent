@@ -29,6 +29,7 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
+/* ══ FORCE WHITE BACKGROUND EVERYWHERE — kills browser/profile theme bleed-through ══ */
 html {
   background: #FFFFFF !important;
   color-scheme: light !important;
@@ -67,12 +68,14 @@ html, body, * {
   box-sizing: border-box;
 }
 
+/* ── Hide Streamlit chrome ── */
 #MainMenu, footer, header,
 [data-testid="stToolbar"],
 [data-testid="stDecoration"],
 [data-testid="stHeader"],
 [data-testid="stStatusWidget"] { display: none !important; }
 
+/* ── App background ── */
 .stApp { background: #FFFFFF !important; }
 [data-testid="stAppViewContainer"] > .main { background: #FFFFFF !important; }
 .main .block-container {
@@ -81,6 +84,7 @@ html, body, * {
   margin:     0 auto !important;
 }
 
+/* ══ SIDEBAR ══ */
 [data-testid="stSidebar"] {
   background:   var(--side-bg) !important;
   border-left:  1px solid var(--border) !important;
@@ -89,19 +93,21 @@ html, body, * {
   padding-top:  0 !important;
 }
 
+/* FIX 1: Pull logo all the way up — kill every top gap Streamlit injects */
 [data-testid="stSidebar"] > div:first-child {
   padding-top: 0 !important;
   margin-top:  0 !important;
 }
 [data-testid="stSidebarUserContent"] {
   padding-top: 0 !important;
-  margin-top:  -3rem !important;
+  margin-top:  -3rem !important;   /* ← pulls logo flush to top */
 }
 [data-testid="stSidebarUserContent"] > div:first-child {
   padding-top: 0 !important;
   margin-top:  0 !important;
 }
 
+/* FIX 2: Tighten all vertical gaps in sidebar — ChatGPT density */
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
   gap: 0 !important;
 }
@@ -114,6 +120,7 @@ html, body, * {
   padding-bottom: 0 !important;
 }
 
+/* ══ SIDEBAR TOGGLE — persistent circle button ══ */
 [data-testid="stSidebarCollapseButton"] {
   display:         flex !important;
   visibility:      visible !important;
@@ -223,6 +230,7 @@ html, body, * {
 [data-testid="collapsedControl"] button:hover { background: var(--blue-ll) !important; }
 [data-testid="collapsedControl"] button:hover::after { color: var(--blue); }
 
+/* ── Sidebar ghost buttons (history) ── */
 [data-testid="stSidebar"] .stButton > button {
   background:      transparent !important;
   color:           var(--text) !important;
@@ -245,6 +253,7 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
+/* New-chat button */
 .new-chat-wrap {
   margin: 10px 0 15px 0 !important;
 }
@@ -264,6 +273,7 @@ html, body, * {
   background: var(--blue-d) !important;
 }
 
+/* Nav items */
 .nav-wrap .stButton > button {
   background:      transparent !important;
   color:           var(--text) !important;
@@ -283,60 +293,82 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
-/* ── btns_col now sits on the LEFT of the card (matches screenshot) ── */
+/* FIX 3: edit/delete icon buttons — colored SVG icons in soft rounded squares,
+   matching the approved mockup exactly. Real SVG is used instead of emoji glyphs
+   so the icon (shape + color) renders identically on every browser/server. */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
   align-items:     center !important;
   display:         flex !important;
+  flex-direction:  row-reverse !important; /* guarantees icons land at the far LEFT under RTL inheritance */
   flex-wrap:       nowrap !important;
   gap:             4px !important;
-  flex-direction:  row !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:first-child {
-  flex:      0 0 68px !important;
-  width:     68px !important;
-  max-width: 68px !important;
-  order:     0 !important;
+  flex:      0 0 80px !important;
+  width:     80px !important;
+  max-width: 80px !important;
+  order:     1 !important;   /* icons pinned to the far left */
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"]:last-child {
   flex:      1 1 auto !important;
   min-width: 0 !important;
   width:     auto !important;
-  order:     1 !important;
+  order:     2 !important;   /* title sits to the right of the icons */
 }
 
 [data-testid="stSidebar"] div[class*="st-key-rename_"],
 [data-testid="stSidebar"] div[class*="st-key-del_"] {
-  width: 30px !important;
-  flex:  0 0 30px !important;
+  width: 36px !important;
+  flex:  0 0 36px !important;
 }
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stColumn"]:first-child [data-testid="stHorizontalBlock"] {
-  gap:             6px !important;
+  gap:             8px !important;
   justify-content: flex-start !important;
 }
 
 [data-testid="stSidebar"] div[class*="st-key-rename_"] button,
 [data-testid="stSidebar"] div[class*="st-key-del_"] button {
-  background:       transparent !important;
-  border:           none !important;
-  border-radius:    8px !important;
-  font-size:        16px !important;
+  font-size:        0 !important;   /* hide the raw emoji glyph; the SVG below draws the icon */
+  color:            transparent !important; /* extra guard so no emoji/text glyph can ever paint */
   line-height:      1 !important;
   padding:          0 !important;
-  min-height:       30px !important;
-  height:           30px !important;
-  width:            30px !important;
-  min-width:        30px !important;
-  max-width:        30px !important;
+  min-height:       36px !important;
+  height:           36px !important;
+  width:            36px !important;
+  min-width:        36px !important;
+  max-width:        36px !important;
+  border-radius:    10px !important;
   box-shadow:       none !important;
   margin:           0 !important;
   display:          flex !important;
   align-items:      center !important;
   justify-content:  center !important;
+  background-repeat:    no-repeat !important;
+  background-position:  center !important;
+  background-size:      18px 18px !important;
+}
+/* Belt-and-braces: explicitly hide every text/icon node Streamlit may render
+   inside the button (span, p, div) so nothing but our background-image shows. */
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button *,
+[data-testid="stSidebar"] div[class*="st-key-del_"] button * {
+  display: none !important;
 }
 
-[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-radius: 8px !important; }
-[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-radius: 8px !important; }
+[data-testid="stSidebar"] div[class*="st-key-del_"] button {
+  background-color: #FEF2F2 !important;
+  border: 1px solid #FEE2E2 !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') !important;
+}
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button {
+  background-color: #EFF3FF !important;
+  border: 1px solid #E0E7FF !important;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232E4BF2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') !important;
+}
 
+[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background-color: #FEE2E2 !important; }
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background-color: #E0E7FF !important; }
+
+/* ══ Previous-chat card ══ */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] {
   background:    #fff !important;
   border-radius: 10px !important;
@@ -345,6 +377,7 @@ html, body, * {
   padding:       4px 8px !important;
 }
 
+/* ══ History Label ══ */
 .hist-label {
   font-size: 11px !important;
   font-weight: 600 !important;
@@ -354,16 +387,18 @@ html, body, * {
   margin-bottom: 12px !important;
   text-transform: uppercase !important;
   letter-spacing: 0.5px !important;
-  text-align: center !important;
+  text-align: center !important; /* Centered as requested */
   width: 100% !important;
 }
 
+/* ══ LOGO ══ */
 [data-testid="stSidebar"] img,
 .welcome-logo img {
   mix-blend-mode: multiply !important;
   background:     transparent !important;
 }
 
+/* ── Welcome Screen (Centered Fix) ── */
 .welcome-wrap {
   display: flex !important;
   flex-direction: column !important;
@@ -393,6 +428,7 @@ html, body, * {
   width: 100% !important;
 }
 
+/* ══ CHAT BUBBLES ══ */
 [data-testid="stChatMessage"] {
   background:    transparent !important;
   border:        none !important;
@@ -438,6 +474,7 @@ html, body, * {
 .rtl { direction: rtl; text-align: right; }
 .ltr { direction: ltr; text-align: left; }
 
+/* ══ CHAT INPUT ══ */
 [data-testid="stChatInput"] {
   border-radius: 24px !important;
   border:        1.5px solid var(--border) !important;
@@ -568,6 +605,7 @@ def _delete_session(sid: str):
 # ══════════════════════════════════════════════════════════════════════════════
 def _sidebar(active: str):
     with st.sidebar:
+        # FIX 1: Logo with no top gap — negative margin pulls it to the top
         st.markdown('<div style="padding:8px 14px 4px;margin-top:-3rem;">', unsafe_allow_html=True)
         try:
             st.image("logo.png", use_container_width=True)
@@ -581,6 +619,7 @@ def _sidebar(active: str):
 
         st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
 
+        # Nav items
         st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
         if st.button("📋 CRM", use_container_width=True, key="nav_crm"):
             st.session_state.page = "crm"
@@ -644,7 +683,7 @@ def _sidebar(active: str):
                                 st.rerun()
                         continue
 
-                    # ── Normal row: trash icon, then edit icon, on the LEFT — title on the right ──
+                    # ── Normal row ──
                     icon = "▶ " if (sid == cur) else ""
                     with st.container(key=f"chat_card_{sid}"):
                         btns_col, row_col = st.columns([2, 6])
@@ -908,7 +947,8 @@ def page_crm():
 # ══════════════════════════════════════════════════════════════════════════════
 def main():
     _init_state()
-
+    
+    # ── Login Gate ──
     if not st.session_state.get("logged_in"):
         st.markdown("""
         <div style="max-width:360px;margin:8rem auto;text-align:center;">
@@ -916,7 +956,7 @@ def main():
             <div style="color:#6B6B8A;margin-bottom:2rem;">Sales Agent — Staff Access Only</div>
         </div>
         """, unsafe_allow_html=True)
-
+        
         col = st.columns([1, 2, 1])[1]
         with col:
             pwd = st.text_input("Password", type="password", placeholder="Enter password")
@@ -927,14 +967,14 @@ def main():
                     st.rerun()
                 else:
                     st.error("❌ Incorrect password")
-        return
-
+        return   
+    
     _sidebar(st.session_state.page)
     if st.session_state.page == "chat":
         page_chat()
     elif st.session_state.page == "crm":
         page_crm()
 
-
+ 
 if __name__ == "__main__":
     main()
