@@ -1,0 +1,7 @@
+pydantic-ai[openai]
+google-genai
+openai
+pymongo
+python-dotenv
+streamlit
+groq
