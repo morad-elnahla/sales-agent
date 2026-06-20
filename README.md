@@ -1,6 +1,6 @@
 <div align="center">
 
-[![Typing SVG](https://readme-typing-svg.demolab.com?font=Syne&weight=800&size=36&pause=1000&color=3D3DB4&center=true&vCenter=true&width=700&lines=Kayfa+AI+Sales+Agent+🤖;Arabic+%2B+English+·+RTL;Agentic+AI+·+RAG+·+MongoDB)](https://git.io/typing-svg)
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Syne&weight=750&size=36&pause=1000&color=3D3DB4&center=true&vCenter=true&width=700&lines=Kayfa+AI+Sales+Agent+🤖;Arabic+%2B+English+·+RTL;Agentic+AI+·+RAG+·+MongoDB)](https://git.io/typing-svg)
 
 [![Python](https://img.shields.io/badge/Python-3.10-E8FF47?style=for-the-badge&logo=python&logoColor=black&labelColor=0a0c10)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-Live-E8FF47?style=for-the-badge&logo=streamlit&logoColor=black&labelColor=0a0c10)](https://streamlit.io)
@@ -23,18 +23,18 @@
 
 ### 💬 Chat Agent — Arabic RTL
 <p align="center">
-  <img src="1.png" width="95%">
+  <img src="images/1.png" width="95%">
 </p>
 <p align="center">
-  <img src="2.png" width="95%">
+  <img src="images/2.png" width="95%">
 </p>
 <p align="center">
-  <img src="3.png" width="95%">
+  <img src="images/3.png" width="95%">
 </p>
 
 ### 📋 CRM Dashboard — Lead Tickets
 <p align="center">
-  <img src="4.png" width="95%">
+  <img src="images/4.png" width="95%">
 </p>
 
 ---
