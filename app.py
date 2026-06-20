@@ -301,49 +301,60 @@ html, body, * {
 
 .action-btn-row {
   display: flex !important;
-  gap: 14px !important; /* Controlled gap between icons */
+  gap: 6px !important;
   justify-content: center !important;
   align-items: center !important;
+  height: 100% !important;
 }
 
-.action-btn button {
-  background:    transparent !important;
-  color:         #bbb !important;
-  border:        none !important;
-  border-radius: 6px !important;
-  font-size:     0 !important;     /* hide the raw emoji glyph (renders as a "tofu" box on some servers/fonts) */
-  padding:       0 !important;
-  min-height:    26px !important;
-  height:        26px !important;
-  box-shadow:    none !important;
-  width:         26px !important;
-  margin:        0 !important;
-  display:       flex !important;
-  align-items:   center !important;
-  justify-content: center !important;
-  position:      relative !important;
+/* Target the real Streamlit button wrapper via its key, since st.markdown divs
+   render as separate siblings (not actual parents) of st.button in Streamlit. */
+[data-testid="stSidebar"] div[class*="st-key-rename_"],
+[data-testid="stSidebar"] div[class*="st-key-del_"] {
+  width: 28px !important;
+  flex: 0 0 28px !important;
 }
+
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button,
+[data-testid="stSidebar"] div[class*="st-key-del_"] button {
+  background:      #fff !important;
+  color:            #9CA3AF !important;
+  border:           1px solid var(--border) !important;
+  border-radius:    8px !important;
+  font-size:        0 !important;     /* hide the raw emoji glyph (renders as a "tofu" box on some servers/fonts) */
+  padding:          0 !important;
+  min-height:       28px !important;
+  height:           28px !important;
+  width:            28px !important;
+  min-width:        28px !important;
+  max-width:        28px !important;
+  box-shadow:       none !important;
+  margin:           0 auto !important;
+  display:          flex !important;
+  align-items:      center !important;
+  justify-content:  center !important;
+  position:         relative !important;
+}
+
 /* Draw crisp inline-SVG icons instead of relying on emoji font support */
-.edit-btn button::before {
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button::before,
+[data-testid="stSidebar"] div[class*="st-key-del_"] button::before {
   content: "";
   display: block;
   width: 14px;
   height: 14px;
   background-color: currentColor;
+}
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button::before {
   -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') no-repeat center / contain;
   mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>') no-repeat center / contain;
 }
-.del-btn button::before {
-  content: "";
-  display: block;
-  width: 14px;
-  height: 14px;
-  background-color: currentColor;
+[data-testid="stSidebar"] div[class*="st-key-del_"] button::before {
   -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') no-repeat center / contain;
   mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>') no-repeat center / contain;
 }
-.del-btn button:hover  { background: #FFE4E4 !important; color: #DC2626 !important; }
-.edit-btn button:hover { background: var(--blue-l) !important; color: var(--blue) !important; }
+[data-testid="stSidebar"] div[class*="st-key-del_"] button:hover    { background: #FFE4E4 !important; border-color: #FCA5A5 !important; color: #DC2626 !important; }
+[data-testid="stSidebar"] div[class*="st-key-rename_"] button:hover { background: var(--blue-l) !important; border-color: var(--blue) !important; color: var(--blue) !important; }
 
 /* ══ Previous-chat card ══ */
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] {
@@ -663,7 +674,7 @@ def _sidebar(active: str):
                     # ── Normal row ──
                     icon = "▶ " if (sid == cur) else ""
                     with st.container(key=f"chat_card_{sid}"):
-                        row_col, btns_col = st.columns([5.5, 2.5])
+                        row_col, btns_col = st.columns([6, 2])
 
                         with row_col:
                             if st.button(f"{icon}{title}", key=f"hist_{sid}",
@@ -680,21 +691,15 @@ def _sidebar(active: str):
                                 st.rerun()
 
                         with btns_col:
-                            st.markdown('<div class="action-btn-row">', unsafe_allow_html=True)
-                            b1, b2 = st.columns(2)
+                            b1, b2 = st.columns(2, gap="small")
                             with b1:
-                                st.markdown('<div class="action-btn edit-btn">', unsafe_allow_html=True)
                                 if st.button("✏", key=f"rename_{sid}", help="Rename"):
                                     st.session_state.renaming_sid = sid
                                     st.rerun()
-                                st.markdown('</div>', unsafe_allow_html=True)
                             with b2:
-                                st.markdown('<div class="action-btn del-btn">', unsafe_allow_html=True)
                                 if st.button("🗑", key=f"del_{sid}", help="Delete"):
                                     _delete_session(sid)
                                     st.rerun()
-                                st.markdown('</div>', unsafe_allow_html=True)
-                            st.markdown('</div>', unsafe_allow_html=True)
 
         elif active == "crm":
             st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
