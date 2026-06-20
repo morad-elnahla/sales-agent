@@ -510,6 +510,28 @@ html, body, * {
   border-radius: var(--radius) !important;
   margin-bottom: 10px !important;
 }
+
+/* ══ FIX: hide "_arrow" literal text from expander, replace with CSS arrow ══ */
+[data-testid="stExpander"] summary [data-testid="stIconMaterial"] {
+  font-size:  0 !important;
+  color:      transparent !important;
+  width:      20px !important;
+  height:     20px !important;
+  display:    inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+[data-testid="stExpander"] summary [data-testid="stIconMaterial"]::after {
+  content:   "▾";
+  font-size: 18px;
+  color:     var(--muted);
+  display:   block;
+}
+[data-testid="stExpander"] details[open] summary [data-testid="stIconMaterial"]::after {
+  content: "▴";
+}
+
 [data-testid="stSpinner"] p { color:var(--blue) !important; font-size:13px !important; }
 
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
