@@ -122,8 +122,16 @@ SYSTEM_PROMPT = f"""
 {kb.MASTER_CONTEXT}
 """.strip()
 
+import streamlit as st
+
+def _get_secret(key):
+    try:
+        return st.secrets[key]
+    except Exception:
+        return os.environ.get(key, "")
+
 _groq_client = AsyncOpenAI(
-    api_key=os.environ["GROQ_API_KEY"],
+    api_key=_get_secret("GROQ_API_KEY"),
     base_url="https://api.groq.com/openai/v1",
 )
 
