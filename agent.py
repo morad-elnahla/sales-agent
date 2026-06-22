@@ -3,6 +3,7 @@ agent.py — Kayfa AI Sales Agent (Groq LLaMA 3.3 + Gemini Embeddings)
 """
 
 import os
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -245,8 +246,54 @@ def semantic_search_tool(ctx: RunContext[SalesDeps], query: str) -> str:
     return "\n".join(lines)
 
 
+_ARABIC_CHAR_RE = re.compile(r"[\u0600-\u06FF]")
+_LETTER_RE = re.compile(r"[^\W\d_]", re.UNICODE)
+
+
+def _is_mostly_arabic(text: str) -> bool:
+    """يرجع True لو أغلب الحروف في النص عربي. نص فاضي يعتبر عربي (مفيش حاجة نترجمها)."""
+    if not text or not text.strip():
+        return True
+    letters = _LETTER_RE.findall(text)
+    if not letters:
+        return True
+    arabic_letters = _ARABIC_CHAR_RE.findall(text)
+    return len(arabic_letters) >= 0.4 * len(letters)
+
+
+async def _force_arabic(text: str) -> str:
+    """
+    شبكة أمان: لو الموديل كتب الملخص/الإجراء بالإنجليزي بالغلط رغم تعليمات
+    الـ system prompt، نترجمه فوراً بنفسنا قبل التخزين في الـ CRM — بدل ما
+    نعتمد بس على التزام الموديل بالتعليمات.
+    """
+    if _is_mostly_arabic(text):
+        return text
+    try:
+        resp = await _groq_client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            temperature=0,
+            max_tokens=200,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "ترجم النص التالي للعربية الفصحى المبسطة. "
+                        "رجّع الترجمة فقط بدون أي شرح أو علامات تنصيص."
+                    ),
+                },
+                {"role": "user", "content": text},
+            ],
+        )
+        translated = resp.choices[0].message.content.strip()
+        return translated if translated else text
+    except Exception as e:
+        print(f"⚠️ DEBUG: فشلت ترجمة النص لعربي ({e}) — استخدام النص الأصلي.")
+        return text
+
+
 @sales_agent.tool
-def save_lead_tool(
+async def save_lead_tool(
     ctx: RunContext[SalesDeps],
     name: str,
     phone: str,
@@ -262,7 +309,31 @@ def save_lead_tool(
     recommended_action: str,
     preferred_language: str,
 ) -> str:
-    """Save a qualified lead as a CRM ticket in MongoDB. Call this once you have the customer name and phone number."""
+    """Save a qualified lead as a CRM ticket in MongoDB. Call this once you have the customer name and phone number.
+
+    Args:
+        name: Customer's full name.
+        phone: Customer's phone number with country code.
+        email: Customer's email address.
+        city: Customer's city/country.
+        interest: The course/track/diploma the customer is interested in.
+        goal: The customer's stated learning or career goal.
+        current_level: Customer's current skill level (beginner/intermediate/advanced).
+        temperature: Lead temperature — "hot", "warm", or "cold".
+        buying_signals: Short phrases (in Arabic) reflecting buying signals the customer expressed.
+        objections: Short phrases (in Arabic) reflecting objections, or "" if none.
+        conversation_summary: MUST be written in Arabic only, even if the conversation was in English.
+            1-2 sentences summarizing what the customer asked for and what was offered.
+            Example: "أبدى المستخدم اهتماماً بدبلومة Fullstack وطلب تفاصيل التسجيل."
+        recommended_action: MUST be written in Arabic only, even if the conversation was in English.
+            One short, concrete next action for the sales team.
+            Example: "إرسال تفاصيل تسجيل دبلومة Fullstack فوراً."
+        preferred_language: The language the customer prefers to be contacted in (e.g. "Arabic", "English").
+    """
+    # شبكة أمان لغوية — تتأكد إن الملخص والإجراء عربي فعلاً قبل التخزين
+    conversation_summary = await _force_arabic(conversation_summary)
+    recommended_action = await _force_arabic(recommended_action)
+
     ticket = {
         "session_id":           ctx.deps.session_id,
         "name":                 name,
