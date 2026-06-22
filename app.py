@@ -738,9 +738,9 @@ def _sidebar(active: str):
 
         elif active == "crm":
             st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
-            st.markdown("**🔽 Filter**")
+            st.markdown("**🔽 تصفية**")
             filt = st.selectbox(
-                "Temperature", ["All", "hot 🔥", "warm 🌤", "cold ❄️"],
+                "الحرارة", ["الكل", "hot 🔥", "warm 🌤", "cold ❄️"],
                 label_visibility="collapsed", key="crm_filter"
             )
             st.session_state.crm_filter_val = filt
@@ -868,7 +868,7 @@ def page_crm():
         st.markdown("## 📋 CRM Dashboard")
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔄 Refresh", key="crm_refresh"):
+        if st.button("🔄 تحديث", key="crm_refresh"):
             st.session_state.pop("crm_cache", None)
 
     st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
@@ -887,20 +887,20 @@ def page_crm():
     cold  = sum(1 for t in all_t if str(t.get("temperature","")).lower() == "cold")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("📊 Total",  len(all_t))
-    c2.metric("🔥 Hot",    hot)
-    c3.metric("🌤 Warm",   warm)
-    c4.metric("❄️ Cold",   cold)
+    c1.metric("📊 الإجمالي",  len(all_t))
+    c2.metric("🔥 ساخن",    hot)
+    c3.metric("🌤 دافئ",   warm)
+    c4.metric("❄️ بارد",   cold)
     st.markdown("<br>", unsafe_allow_html=True)
 
-    filt     = st.session_state.get("crm_filter_val", "All")
+    filt     = st.session_state.get("crm_filter_val", "الكل")
     filtered = all_t
-    if filt and filt != "All":
+    if filt and filt != "الكل":
         key      = filt.split()[0]
         filtered = [t for t in all_t if str(t.get("temperature","")).lower() == key]
 
     if not filtered:
-        st.info("No leads yet — start a conversation from the Chat page!")
+        st.info("لا يوجد عملاء بعد — ابدأ محادثة من صفحة المحادثة!")
         return
 
     TEMP_STYLE = {
@@ -908,10 +908,16 @@ def page_crm():
         "warm": ("#FEF3C7", "#92400E", "🌤"),
         "cold": ("#DBEAFE", "#1E40AF", "❄️"),
     }
+    TEMP_AR = {
+        "hot": "ساخن",
+        "warm": "دافئ",
+        "cold": "بارد",
+    }
 
     for t in filtered:
         temp         = str(t.get("temperature", "warm")).lower()
         bg, tc, icon = TEMP_STYLE.get(temp, ("#F3F4F6", "#374151", "📋"))
+        temp_ar      = TEMP_AR.get(temp, temp)
         date         = str(t.get("created_at", ""))[:16].replace("T", " ")
         name         = t.get("name", "—")
         interest     = t.get("interest", "—")
@@ -919,48 +925,48 @@ def page_crm():
         with st.expander(f"{icon}  {name}  ·  {interest}  ·  {date}"):
             st.markdown(
                 f'<span style="background:{bg};color:{tc};padding:3px 14px;'
-                f'border-radius:999px;font-size:12px;font-weight:600;">{icon} {temp}</span>',
+                f'border-radius:999px;font-size:12px;font-weight:600;">{icon} {temp_ar}</span>',
                 unsafe_allow_html=True,
             )
             st.markdown("<br>", unsafe_allow_html=True)
-            l, r = st.columns(2)
+            r, l = st.columns(2)
 
             def row(label, val, col):
                 if val:
                     col.markdown(
-                        f'<div style="padding:5px 0;border-bottom:1px solid #F0F0FA;font-size:14px;">'
+                        f'<div style="padding:5px 0;border-bottom:1px solid #F0F0FA;font-size:14px;direction:rtl;text-align:right;">'
                         f'<span style="color:#6B6B8A;">{label}:</span> '
                         f'<strong style="color:#1A1A3E;">{val}</strong></div>',
                         unsafe_allow_html=True,
                     )
-            with l:
-                st.markdown("**👤 Client Info**")
-                row("Name",   t.get("name",""),  l)
-                row("Phone",  t.get("phone",""), l)
-                row("Email",  t.get("email",""), l)
-                row("City",   t.get("city",""),  l)
             with r:
-                st.markdown("**🎯 Interest**")
-                row("Product",     t.get("interest",""),       r)
-                row("Goal",        t.get("goal",""),           r)
-                row("Level",       t.get("current_level",""),  r)
-                row("Signals",     t.get("buying_signals",""), r)
-                row("Objections",  t.get("objections",""),     r)
+                st.markdown('<div style="direction:rtl;text-align:right;"><strong>👤 بيانات العميل</strong></div>', unsafe_allow_html=True)
+                row("الاسم",          t.get("name",""),  r)
+                row("الهاتف",         t.get("phone",""), r)
+                row("البريد الإلكتروني", t.get("email",""), r)
+                row("المدينة",        t.get("city",""),  r)
+            with l:
+                st.markdown('<div style="direction:rtl;text-align:right;"><strong>🎯 الاهتمام</strong></div>', unsafe_allow_html=True)
+                row("المنتج",       t.get("interest",""),       l)
+                row("الهدف",        t.get("goal",""),           l)
+                row("المستوى",      t.get("current_level",""),  l)
+                row("الإشارات",     t.get("buying_signals",""), l)
+                row("الاعتراضات",   t.get("objections",""),     l)
 
             if t.get("conversation_summary"):
-                st.markdown("**📝 Conversation Summary**")
+                st.markdown('<div style="direction:rtl;text-align:right;"><strong>📝 ملخص المحادثة</strong></div>', unsafe_allow_html=True)
                 st.markdown(
                     f'<div class="rtl" style="background:#F5F5FD;padding:14px;'
                     f'border-radius:var(--radius);font-size:14px;line-height:1.9;'
-                    f'border-right:3px solid #3D3DB4;">'
+                    f'border-right:3px solid #3D3DB4;direction:rtl;text-align:right;">'
                     f'{t["conversation_summary"]}</div>',
                     unsafe_allow_html=True,
                 )
             if t.get("recommended_action"):
                 st.markdown(
                     f'<div style="margin-top:10px;background:#FEF3C7;padding:11px 16px;'
-                    f'border-radius:var(--radius);font-size:13px;color:#92400E;direction:ltr;">'
-                    f'<strong>Recommended Action:</strong> {t["recommended_action"]}</div>',
+                    f'border-radius:var(--radius);font-size:13px;color:#92400E;direction:rtl;text-align:right;">'
+                    f'<strong>الإجراء المقترح:</strong> {t["recommended_action"]}</div>',
                     unsafe_allow_html=True,
                 )
 

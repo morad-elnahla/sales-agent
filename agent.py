@@ -117,6 +117,32 @@ SYSTEM_PROMPT = f"""
 - راجع تاريخ المحادثة بالكامل قبل استدعاء save_lead_tool
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ قواعد حفظ بيانات الـ CRM Ticket
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+عند استدعاء save_lead_tool، التزم بهذه القواعد تماماً:
+
+📝 conversation_summary:
+- اكتبه بالعربي دائماً — حتى لو المحادثة كانت بالإنجليزي.
+- لخّص في 1-2 جملة: ماذا طلب الزبون + ما قدّمته له + الوضع الحالي.
+- مثال صحيح: "أبدى المستخدم اهتماماً بدبلومة Fullstack وطلب تفاصيل التسجيل، وقدّم بياناته الكاملة."
+- مثال خاطئ: "User expressed interest in Fullstack Diploma..."
+
+⚡ recommended_action:
+- اكتبه بالعربي دائماً — حتى لو المحادثة كانت بالإنجليزي.
+- جملة واحدة قصيرة — إجراء محدد وعملي لفريق المبيعات.
+- مثال صحيح: "إرسال تفاصيل تسجيل دبلومة Fullstack فوراً."
+- مثال خاطئ: "send registration details"
+
+🌡️ temperature:
+- hot   → مستعد للشراء الآن (سأل عن الدفع أو موعد البدء صراحةً)
+- warm  → مهتم وعنده نية لكن لم يقرر بعد
+- cold  → مجرد استفسار عام بدون نية واضحة
+
+📌 buying_signals و objections:
+- اكتبهم بالعربي — جمل قصيرة تعكس ما قاله الزبون فعلاً.
+- لو ما في objections → اتركها فارغة ("").
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KNOWLEDGE BASE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {kb.MASTER_CONTEXT}
@@ -280,7 +306,7 @@ def get_agent_reply(
     message_history: list,
     session_id: str = "",
 ) -> tuple[str, list]:
-    print(f"📨 DEBUG: incoming history length = {len(message_history)}")  # ← ضيف السطر ده
+    print(f"📨 DEBUG: incoming history length = {len(message_history)}")  
     result = sales_agent.run_sync(
         user_message,
         deps=SalesDeps(session_id=session_id),
