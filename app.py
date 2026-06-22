@@ -981,7 +981,7 @@ def main():
     if not st.session_state.get("logged_in"):
         st.markdown("""
         <div style="max-width:360px;margin:8rem auto;text-align:center;">
-            <div style="font-size:48px;font-weight:800;color:#3D3DB4;margin-bottom:8px;">كيف</div>
+            <div style="font-size:48px;font-weight:700;color:#3D3DB4;margin-bottom:8px;">كيف</div>
             <div style="color:#6B6B8A;margin-bottom:2rem;">Sales Agent — Staff Access Only</div>
         </div>
         """, unsafe_allow_html=True)
