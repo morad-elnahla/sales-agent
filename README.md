@@ -1,5 +1,7 @@
 <div align="center">
 
+**Kayfa AI — Sales Agent**: وكيل مبيعات ذكي بالعربي والإنجليزي، بيرد على استفسارات العملاء عن الكورسات وخرائط الطريق، وبيسجّل الـ leads المهمة أوتوماتيك في نظام CRM متكامل.
+
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Syne&weight=750&size=36&pause=1000&color=3D3DB4&center=true&vCenter=true&width=700&lines=Kayfa+AI+Sales+Agent+🤖;Arabic+%2B+English+·+RTL;Agentic+AI+·+RAG+·+MongoDB)](https://git.io/typing-svg)
 
 [![Python](https://img.shields.io/badge/Python-3.10-E8FF47?style=for-the-badge&logo=python&logoColor=black&labelColor=0a0c10)](https://python.org)
