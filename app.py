@@ -64,7 +64,7 @@ body {
 }
 
 html, body, * {
-  font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif !important;
+  font-family: 'IBM Plex Sans Arabic', 'Tahoma', 'Segoe UI', 'Arial', 'Inter', sans-serif !important;
   box-sizing: border-box;
 }
 
