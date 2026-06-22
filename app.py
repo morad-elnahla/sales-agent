@@ -979,9 +979,13 @@ def main():
 
     # ── Login Gate ──
     if not st.session_state.get("logged_in"):
-        st.markdown("""
+        import base64
+        with open("kayfa_wordmark.png", "rb") as _f:
+            _wordmark_b64 = base64.b64encode(_f.read()).decode()
+
+        st.markdown(f"""
         <div style="max-width:360px;margin:8rem auto;text-align:center;">
-            <div style="font-size:48px;font-weight:700;color:#3D3DB4;margin-bottom:8px;">كيف</div>
+            <img src="data:image/png;base64,{_wordmark_b64}" style="height:48px;margin-bottom:8px;">
             <div style="color:#6B6B8A;margin-bottom:2rem;">Sales Agent — Staff Access Only</div>
         </div>
         """, unsafe_allow_html=True)
