@@ -534,6 +534,40 @@ html, body, * {
 
 [data-testid="stSpinner"] p { color:var(--blue) !important; font-size:13px !important; }
 
+/* ══ MD RENDERING INSIDE AI BUBBLE ══ */
+.ai-bubble h1,.ai-bubble h2,.ai-bubble h3 {
+  color: var(--blue); font-weight:700; margin: 8px 0 4px;
+}
+.ai-bubble h1 { font-size:18px; }
+.ai-bubble h2 { font-size:16px; }
+.ai-bubble h3 { font-size:15px; }
+.ai-bubble ul, .ai-bubble ol {
+  margin: 4px 0 4px 0; padding-right:18px; padding-left:0;
+}
+.ai-bubble li { margin-bottom:3px; line-height:1.7; }
+.ai-bubble table {
+  border-collapse:collapse; width:100%; margin:8px 0; font-size:13px;
+}
+.ai-bubble th {
+  background:var(--blue-l); color:var(--blue);
+  padding:6px 10px; border:1px solid var(--border); font-weight:600;
+}
+.ai-bubble td {
+  padding:5px 10px; border:1px solid var(--border);
+}
+.ai-bubble tr:nth-child(even) td { background:var(--blue-ll); }
+.ai-bubble code {
+  background:#F0F0FA; border-radius:4px; padding:1px 5px;
+  font-size:13px; font-family:monospace; color:#2E2E9A;
+}
+.ai-bubble pre {
+  background:#F0F0FA; border-radius:8px; padding:10px 14px;
+  overflow-x:auto; margin:6px 0;
+}
+.ai-bubble pre code { background:none; padding:0; }
+.ai-bubble strong { color:var(--blue); font-weight:700; }
+.ai-bubble a { color:var(--blue); text-decoration:underline; }
+
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
   font-size:13px !important; direction:rtl !important;
   border-radius:8px !important; padding:6px 10px !important;
@@ -580,15 +614,27 @@ def _is_arabic(t: str) -> bool:
 import re
 
 def _md_to_html(text: str) -> str:
-    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
-    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', text)
-    text = re.sub(
-        r'(https?://[^\s<]+[^\s<.,!?؟،])',
-        r'<a href="\1" target="_blank" style="color:#3D3DB4;text-decoration:underline;">\1</a>',
-        text
-    )
-    text = text.replace("\n", "<br>")
-    return text
+    """Convert markdown to HTML with full MD support (tables, lists, headers, code…)."""
+    try:
+        import markdown as _md_lib
+        html = _md_lib.markdown(
+            text,
+            extensions=["tables", "fenced_code", "nl2br", "sane_lists"],
+        )
+        # make links open in new tab
+        html = re.sub(r'<a href=', '<a target="_blank" style="color:#3D3DB4;text-decoration:underline;" href=', html)
+        return html
+    except ImportError:
+        # fallback — basic conversion
+        text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<em>\1</em>', text)
+        text = re.sub(
+            r'(https?://[^\s<]+[^\s<.,!?؟،])',
+            r'<a href="\1" target="_blank" style="color:#3D3DB4;text-decoration:underline;">\1</a>',
+            text,
+        )
+        text = text.replace("\n", "<br>")
+        return text
 
 def _user_bubble(content: str):
     cls = "rtl" if _is_arabic(content) else "ltr"
