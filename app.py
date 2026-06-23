@@ -621,8 +621,13 @@ def _md_to_html(text: str) -> str:
             text,
             extensions=["tables", "fenced_code", "nl2br", "sane_lists"],
         )
-        # make links open in new tab
-        html = re.sub(r'<a href=', '<a target="_blank" style="color:#3D3DB4;text-decoration:underline;" href=', html)
+        # convert bare URLs to clickable links
+        # lookbehind: only match after > or whitespace (skips URLs already in href="...")
+        html = re.sub(
+            r'(?<=[>\s])(https?://\S+?)(?=[\s<]|$)',
+            r'<a href="\1" target="_blank" style="color:#3D3DB4;text-decoration:underline;word-break:break-all;">\1</a>',
+            html,
+        )
         return html
     except ImportError:
         # fallback — basic conversion
