@@ -829,6 +829,7 @@ def page_chat():
             <div class="welcome-logo">{logo_html}</div>
             <div class="welcome-title">مرحباً بك في كيف</div>
             <div class="welcome-sub">اسألني عن أي كورس، مسار، أو دبلومة<br>وأنا أرشدك للمسار الأنسب لك</div>
+            <div style="margin-top:1.2rem;display:inline-block;background:#EDEDFA;color:#3D3DB4;font-size:11px;font-weight:600;padding:4px 16px;border-radius:999px;letter-spacing:0.3px;">Week 3 Task · Part 1 · Kayfa Internship</div>
         </div>
         """, unsafe_allow_html=True)
     else:
@@ -917,6 +918,12 @@ def page_crm():
     col_title, col_btn = st.columns([4, 1])
     with col_title:
         st.markdown("## 📋 CRM Dashboard")
+        st.markdown(
+            '<span style="background:#EDEDFA;color:#3D3DB4;font-size:11px;font-weight:600;'
+            'padding:4px 14px;border-radius:999px;letter-spacing:0.3px;">'
+            'Week 3 Task · Part 1 · Kayfa Internship</span>',
+            unsafe_allow_html=True,
+        )
     with col_btn:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 تحديث", key="crm_refresh"):
@@ -1033,7 +1040,8 @@ def main():
         st.markdown("""
         <div style="max-width:360px;margin:8rem auto;text-align:center;">
             <div style="font-size:40px;font-weight:800;color:#3D3DB4;direction:rtl;margin-bottom:8px;">كيف</div>
-            <div style="color:#6B6B8A;margin-bottom:2rem;">Sales Agent — Staff Access Only</div>
+            <div style="color:#6B6B8A;margin-bottom:0.5rem;">Sales Agent — Staff Access Only</div>
+            <div style="display:inline-block;background:#EDEDFA;color:#3D3DB4;font-size:11px;font-weight:600;padding:4px 14px;border-radius:999px;margin-bottom:1.5rem;letter-spacing:0.3px;">Week 3 Task · Part 1 · Kayfa Internship</div>
         </div>
         """, unsafe_allow_html=True)
 
