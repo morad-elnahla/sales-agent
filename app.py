@@ -291,7 +291,77 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
-/* ══ ICON BUTTONS — layout ══ */
+/* ══ METRIC CARDS — icon badge style ══ */
+.metric-row {
+  display:   flex;
+  gap:       16px;
+  margin:    14px 0 22px 0;
+  flex-wrap: wrap;
+  direction: ltr; /* الكروت بترتيب ثابت بصرف النظر عن RTL */
+}
+.metric-card {
+  flex:          1 1 180px;
+  background:    #FFFFFF;
+  border:        1px solid var(--border);
+  border-radius: 18px;
+  padding:       18px 20px;
+  box-shadow:    0 1px 2px rgba(26,26,62,.04), 0 4px 14px rgba(26,26,62,.05);
+  direction:     rtl;
+  text-align:    right;
+}
+.metric-card-top {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  margin-bottom:   14px;
+}
+.metric-badge {
+  width:           42px;
+  height:          42px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       19px;
+  flex-shrink:     0;
+}
+.metric-trend {
+  font-size:     11px;
+  font-weight:   700;
+  padding:       3px 9px;
+  border-radius: 999px;
+  white-space:   nowrap;
+}
+.metric-label {
+  font-size:     13px;
+  color:         var(--muted);
+  font-weight:   500;
+  margin-bottom: 4px;
+}
+.metric-info {
+  cursor:      help;
+  opacity:     .6;
+  font-size:   12px;
+}
+.metric-value {
+  font-size:   26px;
+  font-weight: 700;
+  color:       var(--text);
+  line-height: 1.15;
+}
+@media (max-width: 640px) {
+  .metric-row  { flex-direction: column; }
+  .metric-card { flex: 1 1 auto; }
+}
+
+/* Nav active pill */
+.nav-wrap.nav-active .stButton > button {
+  background:  var(--blue-l) !important;
+  color:       var(--blue) !important;
+  font-weight: 700 !important;
+}
+
+
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
   align-items:     center !important;
   display:         flex !important;
@@ -532,6 +602,14 @@ html, body, * {
   content: "▴";
 }
 
+/* ══ FIX: force RTL on plain markdown text inside expanders (e.g. Monitoring
+   "📖 Explanation" boxes) so mixed Arabic/English text + `code` + parentheses
+   doesn't get reordered by the browser's default LTR bidi algorithm ══ */
+[data-testid="stExpander"] [data-testid="stMarkdownContainer"] {
+  direction:  rtl !important;
+  text-align: right !important;
+}
+
 [data-testid="stSpinner"] p { color:var(--blue) !important; font-size:13px !important; }
 
 /* ══ MD RENDERING INSIDE AI BUBBLE ══ */
@@ -581,13 +659,14 @@ html, body, * {
 # ══════════════════════════════════════════════════════════════════════════════
 def _init_state():
     defaults = {
-        "page":         "chat",
-        "session_id":   str(uuid.uuid4()),
-        "messages":     [],
-        "history":      [],
-        "chat_names":   {},
-        "renaming_sid": None,
+        "page":          "chat",
+        "session_id":    str(uuid.uuid4()),
+        "messages":      [],
+        "history":       [],
+        "chat_names":    {},
+        "renaming_sid":  None,
         "_names_loaded": False,
+        "current_user":  None,
     }
     for k, v in defaults.items():
         if k not in st.session_state:
@@ -692,16 +771,42 @@ def _sidebar(active: str):
             )
         st.markdown('</div>', unsafe_allow_html=True)
 
+        # ── User info + logout ──
+        user = st.session_state.get("current_user")
+        if user:
+            uname = user.get("username", "")
+            role  = user.get("role", "user")
+            badge_color = "#B91C1C" if role == "admin" else "#3D3DB4"
+            badge_bg    = "#FEE2E2" if role == "admin" else "#EDEDFA"
+            st.markdown(
+                f'<div style="padding:6px 14px 2px;direction:rtl;text-align:right;">'
+                f'<span style="font-size:12px;color:#6B6B8A;">👤 {uname}</span> '
+                f'<span style="background:{badge_bg};color:{badge_color};padding:1px 8px;'
+                f'border-radius:999px;font-size:10px;font-weight:700;">{role.upper()}</span>'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
+
         st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
 
-        st.markdown('<div class="nav-wrap">', unsafe_allow_html=True)
-        if st.button("📋 CRM", use_container_width=True, key="nav_crm"):
-            st.session_state.page = "crm"
-            st.rerun()
+        st.markdown(f'<div class="nav-wrap {"nav-active" if active == "chat" else ""}">', unsafe_allow_html=True)
         if st.button("💬 Chat", use_container_width=True, key="nav_chat"):
             st.session_state.page = "chat"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
+
+        if user and user.get("role") == "admin":
+            st.markdown(f'<div class="nav-wrap {"nav-active" if active == "crm" else ""}">', unsafe_allow_html=True)
+            if st.button("📋 CRM", use_container_width=True, key="nav_crm"):
+                st.session_state.page = "crm"
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown(f'<div class="nav-wrap {"nav-active" if active == "monitor" else ""}">', unsafe_allow_html=True)
+            if st.button("📊 Monitoring", use_container_width=True, key="nav_monitor"):
+                st.session_state.page = "monitor"
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
         if active == "chat":
             st.markdown('<div class="new-chat-wrap">', unsafe_allow_html=True)
@@ -796,6 +901,14 @@ def _sidebar(active: str):
             )
             st.session_state.crm_filter_val = filt
 
+        # ── Logout ──
+        st.markdown('<div style="margin-top:12px;"></div>', unsafe_allow_html=True)
+        if st.button("🚪 تسجيل الخروج", use_container_width=True, key="logout_btn"):
+            for k in ["current_user", "messages", "history", "session_id",
+                      "chat_names", "_names_loaded"]:
+                st.session_state.pop(k, None)
+            st.rerun()
+
         st.markdown(
             '<div style="position:fixed;bottom:0;width:220px;padding:8px 16px;'
             'font-size:11px;color:#C0C0D8;text-align:center;background:var(--side-bg);'
@@ -887,10 +1000,12 @@ def page_chat():
         with st.spinner("جاري التفكير…"):
             try:
                 from agent import get_agent_reply
+                user_id = (st.session_state.get("current_user") or {}).get("username", "anonymous")
                 reply, new_hist = get_agent_reply(
                     prompt,
                     st.session_state.history,
                     st.session_state.session_id,
+                    user_id=user_id,
                 )
                 st.session_state.history = new_hist
             except Exception as e:
@@ -1037,33 +1152,42 @@ def page_crm():
 def main():
     _init_state()
 
-    # ── Login Gate ──
-    if not st.session_state.get("logged_in"):
-        st.markdown("""
-        <div style="max-width:360px;margin:8rem auto;text-align:center;">
-            <div style="font-size:40px;font-weight:800;color:#3D3DB4;direction:rtl;margin-bottom:8px;">كيف</div>
-            <div style="color:#6B6B8A;margin-bottom:0.5rem;">Sales Agent — Staff Access Only</div>
-            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet"><div style="display:inline-block;font-family:'Plus Jakarta Sans',Inter,sans-serif;font-size:13px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;background:#EDEDFA;color:#3D3DB4;padding:7px 20px;border-radius:999px;border:1.5px solid #C7C7F5;margin-bottom:1.5rem;">Week 3 · Part 1 · Kayfa Internship</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # ── Ensure default admin exists ──
+    try:
+        from auth import ensure_default_admin
+        ensure_default_admin()
+    except Exception:
+        pass
 
-        col = st.columns([1, 2, 1])[1]
-        with col:
-            pwd = st.text_input("Password", type="password", placeholder="Enter password")
-            if st.button("Login", use_container_width=True):
-                correct = st.secrets.get("APP_PASSWORD", "kayfa2026")
-                if pwd == correct:
-                    st.session_state.logged_in = True
-                    st.rerun()
-                else:
-                    st.error("❌ Incorrect password")
+    # ── Auth Gate ──
+    if not st.session_state.get("current_user"):
+        from auth import render_auth_page
+        render_auth_page()
         return
 
     _sidebar(st.session_state.page)
+
     if st.session_state.page == "chat":
         page_chat()
     elif st.session_state.page == "crm":
-        page_crm()
+        # Admin only
+        user = st.session_state.get("current_user", {})
+        if user.get("role") == "admin":
+            page_crm()
+        else:
+            st.warning("🔒 هذه الصفحة للأدمن فقط.")
+            st.session_state.page = "chat"
+            st.rerun()
+    elif st.session_state.page == "monitor":
+        # Admin only
+        user = st.session_state.get("current_user", {})
+        if user.get("role") == "admin":
+            from monitoring import render_monitoring_page
+            render_monitoring_page()
+        else:
+            st.warning("🔒 لوحة المراقبة للأدمن فقط.")
+            st.session_state.page = "chat"
+            st.rerun()
 
 
 if __name__ == "__main__":

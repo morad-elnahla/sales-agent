@@ -4,6 +4,7 @@ agent.py — Kayfa AI Sales Agent (Groq LLaMA 3.3 + Gemini Embeddings)
 
 import os
 import re
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -16,6 +17,8 @@ from pydantic_ai.messages import (
     ModelResponse,
     UserPromptPart,
     TextPart,
+    ToolCallPart,
+    ToolReturnPart,
 )
 from openai import AsyncOpenAI
 
@@ -23,6 +26,28 @@ import knowledge as kb
 from db import save_crm_ticket as db_save
 
 load_dotenv()
+
+# ── Pricing (illustrative — update with live rates) ──────────────────────────
+PRICING = {
+    "llm": {
+        "model":           "openai/gpt-oss-120b",
+        "provider":        "Groq",
+        "input_per_1m":    0.15,   # USD per 1M input tokens
+        "output_per_1m":   0.60,   # USD per 1M output tokens
+    },
+    "embedding": {
+        "model":           "gemini-embedding-001",
+        "provider":        "Google",
+        "per_1m":          0.13,   # USD per 1M tokens
+    },
+}
+
+def _calc_cost(input_tok: int, output_tok: int, embed_tok: int) -> tuple[float, float, float]:
+    """Returns (llm_cost, embed_cost, total_cost) in USD."""
+    llm   = (input_tok * PRICING["llm"]["input_per_1m"] +
+             output_tok * PRICING["llm"]["output_per_1m"]) / 1_000_000
+    embed = embed_tok * PRICING["embedding"]["per_1m"] / 1_000_000
+    return round(llm, 8), round(embed, 8), round(llm + embed, 8)
 
 @dataclass
 class SalesDeps:
@@ -74,8 +99,9 @@ SYSTEM_PROMPT = f"""
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ❌ لا تخترع سعراً أو كورساً أو معلومة — من الـ knowledge base بس.
 ❌ لو ما عرفتش → "دعني أوصلك بالفريق: support@kayfa.io"
-❌ لا تخرج من دور مساعد مبيعات Kayfa.
 ❌ لا تقارن Kayfa بالمنافسين بأسلوب سلبي.
+💬 لو الزبون بعت small talk أو نكتة أو سؤال بره النطاق → تفاعل معاه بخفة ودفء جملة واحدة، ثم أعده للموضوع بسلاسة.
+   مثال: لو طلب نكتة → احكيها بإيجاز ثم قل "بس أنا أمهر في Data Science من النكت 😄 — إيه المجال اللي بتفكر فيه؟"
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
  طريقة الرد على أسئلة التعلم
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -431,15 +457,99 @@ def rebuild_message_history(stored_messages: list[dict]) -> list:
     return history
 
 
+def _extract_tool_calls(messages) -> list[dict]:
+    """
+    Extracts tool calls + results from pydantic-ai new_messages().
+    Matches ToolCallPart (in ModelResponse) with ToolReturnPart (in ModelRequest)
+    by tool_call_id.
+    """
+    pending: dict[str, dict] = {}   # tool_call_id → call dict
+    ordered: list[dict] = []
+
+    for msg in messages:
+        if isinstance(msg, ModelResponse):
+            for part in msg.parts:
+                if isinstance(part, ToolCallPart):
+                    try:
+                        args = part.args_as_dict()
+                    except Exception:
+                        args = {"raw": str(part.args)[:300]}
+                    entry = {
+                        "tool_name":    part.tool_name,
+                        "args":         args,
+                        "result":       None,
+                        "tool_call_id": part.tool_call_id,
+                    }
+                    pending[part.tool_call_id] = entry
+                    ordered.append(entry)
+        elif isinstance(msg, ModelRequest):
+            for part in msg.parts:
+                if isinstance(part, ToolReturnPart):
+                    if part.tool_call_id in pending:
+                        pending[part.tool_call_id]["result"] = str(part.content)[:600]
+
+    return ordered
+
+
 def get_agent_reply(
     user_message: str,
     message_history: list,
     session_id: str = "",
+    user_id: str = "anonymous",
 ) -> tuple[str, list]:
-    print(f"📨 DEBUG: incoming history length = {len(message_history)}")  
+    print(f"📨 DEBUG: incoming history length = {len(message_history)}")
+    t0 = time.time()
+
     result = sales_agent.run_sync(
         user_message,
         deps=SalesDeps(session_id=session_id),
         message_history=message_history,
     )
+
+    latency_ms = int((time.time() - t0) * 1000)
+
+    # ── Token usage ──
+    try:
+        usage        = result.usage()
+        input_tokens  = usage.input_tokens  or 0
+        output_tokens = usage.output_tokens or 0
+    except Exception:
+        input_tokens = output_tokens = 0
+
+    # ── Embedding tokens (from knowledge.py counter) ──
+    embed_tokens = kb.get_and_reset_embedding_tokens()
+
+    # ── Tool call trace ──
+    tool_calls = _extract_tool_calls(result.new_messages())
+
+    # ── Cost ──
+    llm_cost, embed_cost, total_cost = _calc_cost(
+        input_tokens, output_tokens, embed_tokens
+    )
+
+    # ── Save usage log ──
+    try:
+        from db import save_usage_log
+        save_usage_log({
+            "user_id":            user_id,
+            "conversation_id":    session_id,
+            "user_prompt":        user_message[:500],
+            "model":              PRICING["llm"]["model"],
+            "provider":           PRICING["llm"]["provider"],
+            "input_tokens":       input_tokens,
+            "output_tokens":      output_tokens,
+            "embedding_model":    PRICING["embedding"]["model"],
+            "embedding_provider": PRICING["embedding"]["provider"],
+            "embedding_tokens":   embed_tokens,
+            "tool_calls":         tool_calls,
+            "final_response":     result.output[:2000],
+            "llm_cost_usd":       llm_cost,
+            "embedding_cost_usd": embed_cost,
+            "total_cost_usd":     total_cost,
+            "latency_ms":         latency_ms,
+            "timestamp":          datetime.now(timezone.utc).isoformat(),
+        })
+    except Exception as e:
+        print(f"⚠️ usage_log save failed: {e}")
+
     return result.output, result.all_messages()

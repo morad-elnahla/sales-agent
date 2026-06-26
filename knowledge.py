@@ -91,44 +91,82 @@ MASTER_CONTEXT = """
 # ============================================================================
 # 4. Keyword Search Helpers
 # ============================================================================
+import re
+
+# الموديل غالباً بيكتب اختصارات طبيعية (AI, ML, DS...) بينما الداتا متخزنة بـ tags
+# ثابتة بصيغة snake_case — الـ map ده يحول الاختصار الشائع لاسم الـ tag الحقيقي.
+TRACK_ALIASES = {
+    "ai": "artificial_intelligence",
+    "ml": "machine_learning",
+    "ds": "data_science",
+    "web": "web_development",
+    "cyber": "cybersecurity",
+    "cybersecurity": "cybersecurity",
+    "frontend": "frontend",
+    "backend": "backend",
+}
+
+
+def _resolve_track(track: str) -> str:
+    return TRACK_ALIASES.get(track.lower().strip(), track)
+
+
+def _tokenize(text: str) -> list[str]:
+    """يقسّم النص لكلمات صغيرة (lowercase) من 2 حروف فأكثر، لاستخدامها في matching."""
+    return [w for w in re.split(r"[^\w]+", text.lower()) if len(w) >= 2]
+
+
 def search_courses(query="", track="", level="", max_results=5):
-    q = query.lower()
-    out = []
+    q_words = _tokenize(query)
+    track = _resolve_track(track) if track else track
+    scored = []
     for c in COURSES:
         ctracks = c.get("track", [])
         if isinstance(ctracks, str):
             ctracks = [ctracks]
-        if track and track.lower() not in [t.lower() for t in ctracks]:
-            continue
+        if track:
+            t_low = track.lower()
+            if not any(t_low in t.lower() or t.lower() in t_low for t in ctracks):
+                continue
         if level and c.get("level","").lower() != level.lower():
             continue
-        if q:
-            blob = (c.get("name","") + " " + c.get("summary","") + " " + " ".join(ctracks)).lower()
-            if q not in blob:
+
+        blob = (c.get("name","") + " " + c.get("summary","") + " " + " ".join(ctracks)).lower()
+        if q_words:
+            score = sum(1 for w in q_words if w in blob)
+            if score == 0:
                 continue
-        out.append({
+        else:
+            score = 0
+
+        scored.append((score, {
             "id": c["id"], "name": c["name"], "track": ctracks,
             "level": c.get("level","N/A"), "duration": c.get("duration","N/A"),
             "prerequisites": c.get("prerequisites","None"),
             "summary": c.get("summary","")[:200], "link": c.get("link",""),
-        })
-        if len(out) >= max_results:
-            break
-    return out
+        }))
+
+    # الأعلى تطابقاً (score) يظهر أولاً — بدون ما نغيّر ترتيب الداتا الأصلي عند تساوي الدرجة
+    scored.sort(key=lambda x: -x[0])
+    return [item for _score, item in scored[:max_results]]
 
 
 def search_roadmaps(query="", roadmap_type="", max_results=5):
-    q = query.lower()
+    q_words = _tokenize(query)
     pool = {"track": TRACKS, "diploma": DIPLOMAS}.get(roadmap_type, ROADMAPS)
-    out = []
+    scored = []
     for r in pool:
-        if q:
-            blob = (r.get("name","") + " " +
-                    " ".join(r.get("skills",[])) + " " +
-                    " ".join(r.get("tools",[]))).lower()
-            if q not in blob:
+        blob = (r.get("name","") + " " +
+                " ".join(r.get("skills",[])) + " " +
+                " ".join(r.get("tools",[]))).lower()
+        if q_words:
+            score = sum(1 for w in q_words if w in blob)
+            if score == 0:
                 continue
-        out.append({
+        else:
+            score = 0
+
+        scored.append((score, {
             "id": r["id"], "name": r["name"],
             "summary": r.get("summary","")[:200],
             "duration": r.get("duration","N/A"),
@@ -137,10 +175,10 @@ def search_roadmaps(query="", roadmap_type="", max_results=5):
             "tools": r.get("tools",[])[:6],
             "link": r.get("link",""),
             "type": "diploma" if r in DIPLOMAS else "track",
-        })
-        if len(out) >= max_results:
-            break
-    return out
+        }))
+
+    scored.sort(key=lambda x: -x[0])
+    return [item for _score, item in scored[:max_results]]
 
 
 def get_courses_in_roadmap(roadmap_id):
@@ -163,6 +201,20 @@ def get_courses_in_roadmap(roadmap_id):
 
 _chunks: list[dict] | None = None      # {"text": ..., "meta": ...}
 _embeddings: list[list[float]] | None = None
+
+# ── Embedding token tracker (read by agent.py after each run) ──────────────
+_last_embedding_tokens: int = 0
+
+def get_and_reset_embedding_tokens() -> int:
+    """Returns tokens sent to Gemini in last semantic_search call, then resets."""
+    global _last_embedding_tokens
+    val = _last_embedding_tokens
+    _last_embedding_tokens = 0
+    return val
+
+def _estimate_tokens(text: str) -> int:
+    """Rough estimate: ~4 chars per token (OK for Arabic+English)."""
+    return max(1, len(text) // 4)
 
 def _build_chunks() -> list[dict]:
     """بيحوّل الكتالوج كله لـ chunks نصية قابلة للـ embedding."""
@@ -233,7 +285,7 @@ def semantic_search(query: str, top_k: int = 4) -> list[dict]:
     بيرجع top_k chunks الأقرب للسؤال.
     بيحتاج GEMINI_API_KEY في الـ environment.
     """
-    global _chunks, _embeddings
+    global _chunks, _embeddings, _last_embedding_tokens
 
     try:
         import google.genai as genai
@@ -251,6 +303,8 @@ def semantic_search(query: str, top_k: int = 4) -> list[dict]:
             config={"task_type": "RETRIEVAL_DOCUMENT"},
         )
         _embeddings = [e.values for e in resp.embeddings]
+        # count build tokens (one-time cost)
+        _last_embedding_tokens += sum(_estimate_tokens(t) for t in batch_texts)
 
     # ── Embed الـ query ──
     q_resp = client.models.embed_content(
@@ -259,6 +313,7 @@ def semantic_search(query: str, top_k: int = 4) -> list[dict]:
         config={"task_type": "RETRIEVAL_QUERY"},
     )
     q_vec = q_resp.embeddings[0].values
+    _last_embedding_tokens += _estimate_tokens(query)
 
     # ── Rank بـ cosine similarity ──
     scored = sorted(
