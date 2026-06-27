@@ -177,6 +177,7 @@ def get_cost_by_conversation(user_id: str | None = None) -> list[dict]:
         match["user_id"] = user_id
     pipeline = [
         *([ {"$match": match} ] if match else []),
+        {"$sort": {"timestamp": 1}},     
         {"$group": {
             "_id":            "$conversation_id",
             "user_id":        {"$first": "$user_id"},
