@@ -301,12 +301,13 @@ html, body, * {
 /* Active nav — left accent bar (key gets an "_active" suffix when that page
    is the current one — see _sidebar() in the Python code below) */
 [data-testid="stSidebar"] div[class*="st-key-nav_"][class*="_active"] button {
-  background:    var(--blue-l) !important;
+  background:    #FFFFFF !important;
   color:         var(--blue) !important;
   font-weight:   700 !important;
   border-radius: 0 8px 8px 0 !important;
   border-left:   3px solid var(--blue) !important;
   margin-left:   -3px !important;
+  box-shadow:    0 1px 4px rgba(26,26,62,.08) !important;
 }
 
 /* Divider */
@@ -801,7 +802,11 @@ def _sidebar(active: str):
                 f'<span style="font-size:13px;color:#1A1A3E;font-weight:600;">{uname}</span>'
                 f'<span style="background:{badge_bg};color:{badge_color};padding:2px 10px;'
                 f'border-radius:999px;font-size:10px;font-weight:700;">{role.upper()}</span>'
-                f'<span style="margin-left:auto;font-size:16px;">👤</span>'
+                f'<span style="margin-left:auto;display:flex;align-items:center;">'
+                f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B8A" '
+                f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                f'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'
+                f'</svg></span>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
