@@ -491,7 +491,7 @@ def render_monitor_c():
     st.markdown("---")
 
     # ── Before vs After summary ──
-    st.markdown("#### 📊 Combined Before vs After")
+    st.markdown('<h4 style="direction:rtl;text-align:right;">📊 Combined Before vs After</h4>', unsafe_allow_html=True)
 
     if all_logs:
         total_cost_before = sum(l.get("total_cost_usd", 0) for l in all_logs)
@@ -509,11 +509,16 @@ def render_monitor_c():
 """
         )
 
-        st.success(
-            f"✅ بتطبيق الـ 2 optimizations، التكلفة الكلية تنخفض بـ "
-            f"**{_fmt_cost(total_saving)}** "
-            f"({100*total_saving/max(total_cost_before,1e-9):.1f}% saving)."
-        )
+        st.markdown(
+            f'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;'
+            f'padding:10px 16px;margin-top:10px;direction:rtl;text-align:right;">'
+            f'<span style="font-size:13px;color:#15803D;">'
+            f'✅ بتطبيق الـ 2 optimizations، التكلفة الكلية تنخفض بـ '
+            f'<strong>{_fmt_cost(total_saving)}</strong> '
+            f'({100*total_saving/max(total_cost_before,1e-9):.1f}% saving).'
+            f'</span></div>',
+            unsafe_allow_html=True,
+)
     else:
         st.info("أضف محادثات أولاً.")
 
