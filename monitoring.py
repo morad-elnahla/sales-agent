@@ -366,7 +366,8 @@ def render_monitor_b():
         )
     elif tools:
         st.success(
-            f"✅ **Grounded**: الرد مبني على {len(tools)} tool call(s) من الـ knowledge base."
+            f'✅ <strong>Grounded</strong>: الرد مبني على <strong>{len(tools)}</strong> tool call من الـ knowledge base.'
+
         )
 
 
