@@ -365,10 +365,13 @@ def render_monitor_b():
             "تسجيل محددة** بدون أي tool call، يستحق تتأكد إنها مش مُخمَّنة."
         )
     elif tools:
-        st.success(
-            f'✅ <strong>Grounded</strong>: الرد مبني على <strong>{len(tools)}</strong> tool call من الـ knowledge base.'
-
-        )
+        st.markdown(
+                f'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;'
+                f'padding:10px 16px;margin-top:10px;direction:rtl;text-align:right;">'
+                f'✅ الرد مبني على <strong>{len(tools)}</strong> tool call من الـ knowledge base.'
+                f'</div>',
+                unsafe_allow_html=True,
+            )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
