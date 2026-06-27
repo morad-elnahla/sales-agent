@@ -271,24 +271,42 @@ html, body, * {
   background: var(--blue-d) !important;
 }
 
-/* Nav items */
+/* Nav items — LTR icon+label rows */
 .nav-wrap .stButton > button {
   background:      transparent !important;
   color:           var(--text) !important;
   border:          none !important;
   border-radius:   8px !important;
-  font-size:       13px !important;
+  font-size:       14px !important;
   font-weight:     500 !important;
-  padding:         5px 10px !important;
-  text-align:      right !important;
-  justify-content: flex-end !important;
+  padding:         9px 14px !important;
+  text-align:      left !important;
+  justify-content: flex-start !important;
+  direction:       ltr !important;
   transition:      background .15s !important;
   width:           100% !important;
-  min-height:      30px !important;
+  min-height:      38px !important;
 }
 .nav-wrap .stButton > button:hover {
   background: var(--blue-l) !important;
   color:      var(--blue) !important;
+}
+
+/* Active nav — left accent bar */
+.nav-wrap.nav-active .stButton > button {
+  background:    var(--blue-l) !important;
+  color:         var(--blue) !important;
+  font-weight:   700 !important;
+  border-radius: 0 8px 8px 0 !important;
+  border-left:   3px solid var(--blue) !important;
+  margin-left:   -3px !important;
+}
+
+/* Divider */
+.k-divider {
+  border:     none;
+  border-top: 1px solid var(--border);
+  margin:     10px 0;
 }
 
 /* ══ METRIC CARDS — icon badge style ══ */
@@ -353,14 +371,6 @@ html, body, * {
   .metric-row  { flex-direction: column; }
   .metric-card { flex: 1 1 auto; }
 }
-
-/* Nav active pill */
-.nav-wrap.nav-active .stButton > button {
-  background:  var(--blue-l) !important;
-  color:       var(--blue) !important;
-  font-weight: 700 !important;
-}
-
 
 [data-testid="stSidebar"] [class*="st-key-chat_card_"] [data-testid="stHorizontalBlock"] {
   align-items:     center !important;
@@ -760,12 +770,12 @@ def _delete_session(sid: str):
 # ══════════════════════════════════════════════════════════════════════════════
 def _sidebar(active: str):
     with st.sidebar:
-        st.markdown('<div style="padding:8px 14px 4px;margin-top:-3rem;">', unsafe_allow_html=True)
+        st.markdown('<div style="padding:14px 14px 6px;margin-top:-3rem;text-align:left;">', unsafe_allow_html=True)
         try:
-            st.image("logo.png", use_container_width=True)
+            st.image("logo.png", width=130)
         except Exception:
             st.markdown(
-                '<div style="font-size:24px;font-weight:700;color:#3D3DB4;direction:rtl;">'
+                '<div style="font-size:22px;font-weight:700;color:#3D3DB4;direction:ltr;text-align:left;">'
                 'كيف</div>',
                 unsafe_allow_html=True,
             )
@@ -776,13 +786,15 @@ def _sidebar(active: str):
         if user:
             uname = user.get("username", "")
             role  = user.get("role", "user")
-            badge_color = "#B91C1C" if role == "admin" else "#3D3DB4"
-            badge_bg    = "#FEE2E2" if role == "admin" else "#EDEDFA"
+            badge_color = "#BE185D" if role == "admin" else "#3D3DB4"
+            badge_bg    = "#FCE7F3" if role == "admin" else "#EDEDFA"
             st.markdown(
-                f'<div style="padding:6px 14px 2px;direction:rtl;text-align:right;">'
-                f'<span style="font-size:12px;color:#6B6B8A;">👤 {uname}</span> '
-                f'<span style="background:{badge_bg};color:{badge_color};padding:1px 8px;'
+                f'<div style="padding:4px 14px 10px;direction:ltr;display:flex;'
+                f'align-items:center;gap:8px;">'
+                f'<span style="font-size:13px;color:#1A1A3E;font-weight:600;">{uname}</span>'
+                f'<span style="background:{badge_bg};color:{badge_color};padding:2px 10px;'
                 f'border-radius:999px;font-size:10px;font-weight:700;">{role.upper()}</span>'
+                f'<span style="margin-left:auto;font-size:16px;">👤</span>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
