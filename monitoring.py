@@ -491,7 +491,8 @@ def render_monitor_c():
     st.markdown("---")
 
     # ── Before vs After summary ──
-    st.markdown('<h4 style="direction:rtl;text-align:right;">📊 Combined Before vs After</h4>', unsafe_allow_html=True)
+    st.markdown("#### 📊 Combined Before vs After")
+
 
     if all_logs:
         total_cost_before = sum(l.get("total_cost_usd", 0) for l in all_logs)
