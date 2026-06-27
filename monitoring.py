@@ -152,10 +152,11 @@ def render_monitor_a():
 
     # ── Per-message table ──
     st.markdown("#### 📨 Recent Messages (most expensive first)")
+    n = st.slider("عدد الرسائل المعروضة", 10, 100, 20, key="msg_slider")
     sorted_logs = sorted(all_logs, key=lambda x: x.get("total_cost_usd", 0), reverse=True)
 
     rows_html = ""
-    for log in sorted_logs[:20]:
+    for log in sorted_logs[:n]:
         prompt   = (log.get("user_prompt") or "")[:60]
         tot      = _fmt_cost(log.get("total_cost_usd", 0))
         llm_c    = _fmt_cost(log.get("llm_cost_usd", 0))
@@ -337,9 +338,9 @@ def render_monitor_b():
     # Final response
     st.markdown(
         f'<div style="background:#F0F4F9;border-radius:14px;padding:12px 18px;'
-        f'margin:8px 0;direction:rtl;text-align:right;">'
+        f'margin:8px 0;">'
         f'<span style="font-size:11px;color:#3D3DB4;font-weight:600;">💬 FINAL RESPONSE</span><br>'
-        f'<span style="font-size:14px;display:block;white-space:pre-wrap;">'
+        f'<span style="font-size:14px;direction:rtl;text-align:right;display:block;">'
         f'{response}</span>'
         f'</div>',
         unsafe_allow_html=True,
@@ -357,25 +358,15 @@ def render_monitor_b():
 
     # Hallucination check
     if not tools and response:
-        st.markdown(
-            '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;'
-            'padding:10px 16px;margin-top:10px;direction:rtl;text-align:right;">'
-            '<span style="font-size:13px;color:#1E40AF;">'
-            'ℹ️ <strong>بدون tool calls</strong> — تم الرد مباشرة من المعلومات الثابتة في الـ system prompt '
-            '(زي السياسات، التواصل، معلومات الشركة). هذا متوقّع وسليم للأسئلة العامة بفضل '
-            'تحسين Selective RAG، وليس بالضرورة خطأ. لكن لو الرد ده فيه <strong>سعر كورس أو تفاصيل '
-            'تسجيل محددة</strong> بدون أي tool call، يستحق تتأكد إنها مش مُخمَّنة.'
-            '</span></div>',
-            unsafe_allow_html=True,
+        st.info(
+            "ℹ️ **بدون tool calls** — تم الرد مباشرة من المعلومات الثابتة في الـ system prompt "
+            "(زي السياسات، التواصل، معلومات الشركة). هذا متوقّع وسليم للأسئلة العامة بفضل "
+            "تحسين Selective RAG، وليس بالضرورة خطأ. لكن لو الرد ده فيه **سعر كورس أو تفاصيل "
+            "تسجيل محددة** بدون أي tool call، يستحق تتأكد إنها مش مُخمَّنة."
         )
     elif tools:
-        st.markdown(
-            f'<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;'
-            f'padding:10px 16px;margin-top:10px;direction:rtl;text-align:right;">'
-            f'<span style="font-size:13px;color:#15803D;">'
-            f'✅ <strong>Grounded</strong>: الرد مبني على {len(tools)} tool call(s) من الـ knowledge base.'
-            f'</span></div>',
-            unsafe_allow_html=True,
+        st.success(
+            f"✅ **Grounded**: الرد مبني على {len(tools)} tool call(s) من الـ knowledge base."
         )
 
 
