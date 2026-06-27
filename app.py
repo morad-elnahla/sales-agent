@@ -251,11 +251,12 @@ html, body, * {
   color:      var(--blue) !important;
 }
 
-/* New-chat button */
-.new-chat-wrap {
+/* New-chat button — targeted via real st-key class (div-wrap trick doesn't
+   actually nest in the DOM, so we hook the button's own keyed container) */
+[data-testid="stSidebar"] div[class*="st-key-new_chat"] {
   margin: 10px 0 15px 0 !important;
 }
-.new-chat-wrap .stButton > button {
+[data-testid="stSidebar"] div[class*="st-key-new_chat"] button {
   background:      var(--blue) !important;
   color:           #fff !important;
   border-radius:   999px !important;
@@ -266,13 +267,16 @@ html, body, * {
   width:           100% !important;
   justify-content: center !important;
   min-height:      34px !important;
+  direction:       ltr !important;
 }
-.new-chat-wrap .stButton > button:hover {
+[data-testid="stSidebar"] div[class*="st-key-new_chat"] button:hover {
   background: var(--blue-d) !important;
 }
 
-/* Nav items — LTR icon+label rows */
-.nav-wrap .stButton > button {
+/* Nav items — LTR icon+label rows, hooked the same way */
+[data-testid="stSidebar"] div[class*="st-key-nav_chat"] button,
+[data-testid="stSidebar"] div[class*="st-key-nav_crm"] button,
+[data-testid="stSidebar"] div[class*="st-key-nav_monitor"] button {
   background:      transparent !important;
   color:           var(--text) !important;
   border:          none !important;
@@ -287,13 +291,16 @@ html, body, * {
   width:           100% !important;
   min-height:      38px !important;
 }
-.nav-wrap .stButton > button:hover {
+[data-testid="stSidebar"] div[class*="st-key-nav_chat"] button:hover,
+[data-testid="stSidebar"] div[class*="st-key-nav_crm"] button:hover,
+[data-testid="stSidebar"] div[class*="st-key-nav_monitor"] button:hover {
   background: var(--blue-l) !important;
   color:      var(--blue) !important;
 }
 
-/* Active nav — left accent bar */
-.nav-wrap.nav-active .stButton > button {
+/* Active nav — left accent bar (key gets an "_active" suffix when that page
+   is the current one — see _sidebar() in the Python code below) */
+[data-testid="stSidebar"] div[class*="st-key-nav_"][class*="_active"] button {
   background:    var(--blue-l) !important;
   color:         var(--blue) !important;
   font-weight:   700 !important;
@@ -801,33 +808,28 @@ def _sidebar(active: str):
 
         st.markdown('<hr class="k-divider">', unsafe_allow_html=True)
 
-        st.markdown(f'<div class="nav-wrap {"nav-active" if active == "chat" else ""}">', unsafe_allow_html=True)
-        if st.button("💬 Chat", use_container_width=True, key="nav_chat"):
+        chat_key = "nav_chat_active" if active == "chat" else "nav_chat"
+        if st.button("💬  Chat", use_container_width=True, key=chat_key):
             st.session_state.page = "chat"
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
         if user and user.get("role") == "admin":
-            st.markdown(f'<div class="nav-wrap {"nav-active" if active == "crm" else ""}">', unsafe_allow_html=True)
-            if st.button("📋 CRM", use_container_width=True, key="nav_crm"):
+            crm_key = "nav_crm_active" if active == "crm" else "nav_crm"
+            if st.button("📋  CRM", use_container_width=True, key=crm_key):
                 st.session_state.page = "crm"
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
-            st.markdown(f'<div class="nav-wrap {"nav-active" if active == "monitor" else ""}">', unsafe_allow_html=True)
-            if st.button("📊 Monitoring", use_container_width=True, key="nav_monitor"):
+            mon_key = "nav_monitor_active" if active == "monitor" else "nav_monitor"
+            if st.button("📊  Monitoring", use_container_width=True, key=mon_key):
                 st.session_state.page = "monitor"
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
         if active == "chat":
-            st.markdown('<div class="new-chat-wrap">', unsafe_allow_html=True)
             if st.button("✦  New Chat", use_container_width=True, key="new_chat"):
                 for k in ["session_id", "messages", "history"]:
                     st.session_state.pop(k, None)
                 st.session_state.renaming_sid = None
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
             st.markdown('<div class="hist-label">Previous Chats</div>', unsafe_allow_html=True)
             sessions = _load_sessions()
