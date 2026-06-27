@@ -502,10 +502,21 @@ def get_agent_reply(
     latency_ms = int((time.time() - t0) * 1000)
 
     # ── Token usage ──
+    # بعد ✅ — compatible مع 0.0.46
     try:
-        usage        = result.usage()
-        input_tokens  = usage.input_tokens  or 0
-        output_tokens = usage.output_tokens or 0
+        usage = result.usage()
+        # 0.0.46 بيحط الـ tokens في dict أو attributes مختلفة
+        if hasattr(usage, 'input_tokens'):
+            input_tokens  = usage.input_tokens  or 0
+            output_tokens = usage.output_tokens or 0
+        elif hasattr(usage, 'request_tokens'):
+            input_tokens  = usage.request_tokens  or 0
+            output_tokens = usage.response_tokens or 0
+        elif isinstance(usage, dict):
+            input_tokens  = usage.get('input_tokens') or usage.get('request_tokens') or 0
+            output_tokens = usage.get('output_tokens') or usage.get('response_tokens') or 0
+        else:
+            input_tokens = output_tokens = 0
     except Exception:
         input_tokens = output_tokens = 0
 
